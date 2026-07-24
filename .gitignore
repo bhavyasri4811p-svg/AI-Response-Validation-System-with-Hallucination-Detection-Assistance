@@ -1,0 +1,21 @@
+# Python
+**/__pycache__/
+*.py[cod]
+Backend/.env
+Backend/venv/
+
+# ChromaDB
+Backend/chromadb/
+
+# Node
+Frontend/node_modules/
+
+# Build
+Frontend/dist/
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
