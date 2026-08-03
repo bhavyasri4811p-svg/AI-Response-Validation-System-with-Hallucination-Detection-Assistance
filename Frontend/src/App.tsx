@@ -7,6 +7,7 @@ import { HistoryPage } from './pages/HistoryPage';
 import { KnowledgeBasePage } from './pages/KnowledgeBasePage';
 import { SettingsPage } from './pages/SettingsPage';
 import { AboutPage } from './pages/AboutPage';
+import BatchEvaluationPage from './pages/BatchEvaluationPage.tsx';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/knowledge" element={<KnowledgeBasePage />} />
+            <Route path="/batch" element={<BatchEvaluationPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />

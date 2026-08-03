@@ -158,7 +158,7 @@ export function EvaluationDashboard() {
 
   if (!currentEvaluation) return null;
 
-  const { metrics, hallucinationLevel, suggestions, recommendations } = currentEvaluation;
+  const { metrics, hallucinationLevel, suggestions, recommendations,verdict, } = currentEvaluation;
 
   const chartData = [
     { name: 'Correctness', value: metrics.correctness, fill: '#22d3ee' },
@@ -211,7 +211,7 @@ ${currentEvaluation.referenceAnswer}
 --------------------------------------------------------------------------------
                            SUGGESTIONS
 --------------------------------------------------------------------------------
-${suggestions.map((s) => `  • ${s}`).join('\n')}
+${suggestions.join('\n\n')}
 
 --------------------------------------------------------------------------------
                           RECOMMENDATIONS
@@ -249,6 +249,29 @@ ${recommendations.map((r) => `  • ${r}`).join('\n')}
           <div className="flex justify-center">
             <CircularProgress value={metrics.overallScore} />
           </div>
+        </div>
+      </div>
+      <div className="glass-card rounded-3xl p-8 animate-fade-in-up">
+        <h2 className="text-2xl font-semibold text-white mb-6">
+          Overall Verdict
+        </h2>
+
+        <h1 className="text-5xl font-bold text-cyan-400 mb-4">
+          {verdict.verdict}
+        </h1>
+
+        <p className="text-xl text-white mb-6">
+          Overall Score : {verdict.overall_score}/10
+        </p>
+
+        <div className="rounded-xl bg-slate-800 p-5">
+          <h3 className="text-lg font-semibold text-cyan-400 mb-3">
+            Summary
+          </h3>
+
+          <p className="text-slate-300 whitespace-pre-wrap">
+            {verdict.summary}
+          </p>
         </div>
       </div>
 
@@ -346,7 +369,7 @@ ${recommendations.map((r) => `  • ${r}`).join('\n')}
               <div className="p-1.5 rounded-full bg-cyan-500/20 mt-0.5">
                 <CheckCircle size={14} className="text-cyan-400" />
               </div>
-              <span className="text-slate-300 leading-relaxed">{suggestion}</span>
+              <div className="text-slate-300 leading-relaxed whitespace-pre-line">{suggestion}</div>
             </div>
           ))}
         </div>

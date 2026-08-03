@@ -15,6 +15,11 @@ export interface EvaluationResult {
   referenceAnswer: string;
   sourceDocument?: string;
   metrics: EvaluationMetrics;
+  verdict: {
+    overall_score: number;
+    verdict: string;
+    summary: string;
+  };
   hallucinationLevel: 'Low' | 'Medium' | 'High';
   suggestions: string[];
   recommendations: string[];

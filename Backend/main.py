@@ -1,8 +1,10 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, UploadFile, File
 from pydantic import BaseModel
 
+import tempfile
+from fastapi.middleware.cors import CORSMiddleware
 from judge_orchestrator import evaluate_response
+from batch_evaluator import evaluate_csv
 
 app = FastAPI()
 
@@ -26,3 +28,16 @@ def evaluate(request: EvaluationRequest):
         request.response,
         request.reference
     )
+    return result
+@app.post("/batch_evaluate")
+async def batch_evaluate(file: UploadFile = File(...)):
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".csv") as temp:
+
+        temp.write(await file.read())
+
+        csv_path = temp.name
+
+    result = evaluate_csv(csv_path)
+
+    return result

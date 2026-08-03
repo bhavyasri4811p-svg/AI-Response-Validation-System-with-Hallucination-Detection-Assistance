@@ -21,18 +21,29 @@ Question:
 
 Response:
 {response}
-
-Return ONLY in this format:
+Return ONLY exactly in the following format.
+Use line breaks exactly as shown.
 
 Relevance Score: <0-10>
 
 Reason:
-<short explanation>
+<Write the explanation here on a new line.>
+
+Do not write the score and reason on the same line.
+Example Output:
+
+Relevance Score: 8
+
+Reason:
+The response answers the question correctly but misses some important details.
+
+Follow this format exactly.
 """
 
     result = llm.invoke(prompt)
-    return result.content
-
+    output = result.content
+    output = output.replace(" Reason:", "\n\nReason:\n")
+    return output
 
 if __name__ == "__main__":
     question = input("Question: ")

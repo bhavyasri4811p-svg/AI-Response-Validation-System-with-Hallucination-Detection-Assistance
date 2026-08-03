@@ -27,12 +27,24 @@ Reference Answer:
 Response:
 {response}
 
-Return ONLY in this format:
+Return ONLY in this exact format:
 
 Hallucination Score: <0-10>
 
 Reason:
-<Explain whether unsupported or invented information exists.>
+<short explanation>
+
+Do not write the reason on the same line as the score.
+
+Do not write the score and reason on the same line.
+Example Output:
+
+Hallucination Score: 2
+
+Reason:
+The response is mostly supported by the reference answer and contains only minor unsupported details.
+
+Follow this format exactly.
 
 Scoring:
 0 = No hallucination.
@@ -43,7 +55,9 @@ Scoring:
 """
 
     result = llm.invoke(prompt)
-    return result.content
+    output = result.content
+    output = output.replace(" Reason:", "\n\nReason:\n")
+    return output
 
 
 if __name__ == "__main__":

@@ -10,14 +10,50 @@ import {
   Menu,
   X,
   ChevronRight,
+  Table,
 } from 'lucide-react';
-
 const navItems = [
-  { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, description: 'Evaluate responses' },
-  { path: '/history', label: 'History', icon: History, description: 'Past evaluations' },
-  { path: '/knowledge', label: 'Knowledge Base', icon: BookOpen, description: 'Manage documents' },
-  { path: '/settings', label: 'Settings', icon: Settings, description: 'Configure preferences' },
-  { path: '/about', label: 'About', icon: Info, description: 'Project details' },
+  {
+    path: "/dashboard",
+    label: "Dashboard",
+    icon: LayoutDashboard,
+    description: "Evaluate responses",
+  },
+
+  {
+    path: "/batch",
+    label: "Batch Evaluation",
+    icon: Table,
+    description: "Evaluate CSV files",
+  },
+
+  {
+    path: "/history",
+    label: "History",
+    icon: History,
+    description: "Past evaluations",
+  },
+
+  {
+    path: "/knowledge",
+    label: "Knowledge Base",
+    icon: BookOpen,
+    description: "Manage documents",
+  },
+
+  {
+    path: "/settings",
+    label: "Settings",
+    icon: Settings,
+    description: "Configure preferences",
+  },
+
+  {
+    path: "/about",
+    label: "About",
+    icon: Info,
+    description: "Project details",
+  },
 ];
 
 export function Sidebar() {
