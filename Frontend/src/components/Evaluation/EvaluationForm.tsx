@@ -3,7 +3,7 @@ import { useEvaluation } from '../../store/EvaluationContext';
 import { FileUp, Send, X, FileText, Sparkles } from 'lucide-react';
 
 export function EvaluationForm() {
-  const { evaluate, settings } = useEvaluation();
+  const { evaluate, settings, evaluationError, isEvaluating } = useEvaluation();
   const [question, setQuestion] = useState('');
   const [aiResponse, setAiResponse] = useState('');
   const [referenceAnswer, setReferenceAnswer] = useState('');
@@ -49,6 +49,12 @@ export function EvaluationForm() {
           All fields marked <span className="text-red-400">*</span> are required
         </div>
       </div>
+
+      {evaluationError && (
+        <div className="mb-8 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200" role="alert">
+          {evaluationError}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Question */}
@@ -155,11 +161,11 @@ export function EvaluationForm() {
         {/* Submit Button */}
         <button
           type="submit"
-          disabled={!question.trim() || !aiResponse.trim()}
+          disabled={isEvaluating || !question.trim() || !aiResponse.trim()}
           className="w-full group button-gradient py-5 rounded-2xl text-white font-semibold text-lg flex items-center justify-center gap-3 disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
         >
           <Send size={22} className="transition-transform group-hover:translate-x-1" />
-          Evaluate Response
+          {isEvaluating ? 'Evaluating...' : 'Evaluate Response'}
         </button>
       </form>
     </div>

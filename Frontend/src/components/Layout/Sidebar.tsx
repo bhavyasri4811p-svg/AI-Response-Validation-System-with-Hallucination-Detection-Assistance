@@ -11,43 +11,46 @@ import {
   X,
   ChevronRight,
   Table,
+  FileCheck,
+  Files,
 } from 'lucide-react';
 const navItems = [
   {
     path: "/dashboard",
     label: "Dashboard",
     icon: LayoutDashboard,
-    description: "Evaluate responses",
+    description: "View evaluation analytics",
   },
-
+  {
+    path: "/single",
+    label: "Single Evaluation",
+    icon: FileCheck,
+    description: "Evaluate one AI response",
+  },
   {
     path: "/batch",
     label: "Batch Evaluation",
-    icon: Table,
-    description: "Evaluate CSV files",
+    icon: Files,
+    description: "Evaluate multiple responses",
   },
-
   {
     path: "/history",
     label: "History",
     icon: History,
     description: "Past evaluations",
   },
-
   {
     path: "/knowledge",
     label: "Knowledge Base",
     icon: BookOpen,
     description: "Manage documents",
   },
-
   {
     path: "/settings",
     label: "Settings",
     icon: Settings,
     description: "Configure preferences",
   },
-
   {
     path: "/about",
     label: "About",

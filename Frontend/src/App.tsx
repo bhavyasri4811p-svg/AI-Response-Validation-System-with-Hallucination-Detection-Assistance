@@ -8,6 +8,7 @@ import { KnowledgeBasePage } from './pages/KnowledgeBasePage';
 import { SettingsPage } from './pages/SettingsPage';
 import { AboutPage } from './pages/AboutPage';
 import BatchEvaluationPage from './pages/BatchEvaluationPage.tsx';
+import SingleEvaluationPage from './pages/SingleEvaluationPage';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/single" element={<SingleEvaluationPage />} />
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/knowledge" element={<KnowledgeBasePage />} />
             <Route path="/batch" element={<BatchEvaluationPage />} />

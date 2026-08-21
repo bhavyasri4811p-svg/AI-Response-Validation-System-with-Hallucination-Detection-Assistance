@@ -1,9 +1,11 @@
 import { useMemo, useState } from "react";
 import axios from "axios";
+import { useEvaluation } from '../../store/EvaluationContext';
 
 interface Result {
   question: string;
-
+  response?: string;
+  reference?: string;
   relevance: string;
   accuracy: string;
   hallucination: string;
@@ -24,11 +26,20 @@ interface Summary {
   fail: number;
 }
 
+const extractScore = (value: string | number | undefined): number => {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (typeof value !== 'string') return 0;
+  const match = value.match(/-?\d+(?:\.\d+)?/);
+  return match ? Number(match[0]) : 0;
+};
+
 function BatchEvaluation() {
+  const { addHistoryItems } = useEvaluation();
   const [file, setFile] = useState<File | null>(null);
   const [results, setResults] = useState<Result[]>([]);
   const [summary, setSummary] = useState<Summary | null>(null);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("ALL");
 
@@ -58,23 +69,63 @@ function BatchEvaluation() {
 
     try {
       setLoading(true);
+      setErrorMessage(null);
 
       const response = await axios.post(
         "http://127.0.0.1:8000/batch_evaluate",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
+        formData
       );
 
-      setResults(response.data.results);
+      const batchResults = response.data.results;
+      const historyItems = batchResults.map((item: Result, index: number) => {
+        const relevance = extractScore(item.relevance);
+        const accuracy = extractScore(item.accuracy);
+        const hallucination = extractScore(item.hallucination);
+        const completeness = extractScore(item.completeness);
+
+        const overallScore = Number(item.verdict.overall_score) || 0;
+        const hallucinationLevel =
+          hallucination <= 2
+            ? 'Low'
+            : hallucination <= 6
+            ? 'Medium'
+            : 'High';
+
+        const batchId = `${item.question}|${item.response ?? ''}|${item.reference ?? ''}|${item.verdict.verdict}|${item.verdict.overall_score}|${index}`;
+
+        return {
+          id: batchId,
+          question: item.question,
+          aiResponse: item.response ?? 'Not Provided',
+          referenceAnswer: item.reference ?? 'Not Provided',
+          sourceDocument: undefined,
+          metrics: {
+            correctness: accuracy * 10,
+            relevance: relevance * 10,
+            faithfulness: 100,
+            completeness: completeness * 10,
+            fluency: 100,
+            hallucinationRisk: hallucination * 10,
+            overallScore,
+          },
+          verdict: {
+            overall_score: item.verdict.overall_score,
+            verdict: item.verdict.verdict,
+            summary: item.verdict.reason || 'Batch evaluation result',
+          },
+          hallucinationLevel,
+          suggestions: [item.relevance, item.accuracy, item.hallucination, item.completeness],
+          recommendations: ['Batch evaluation loaded from CSV'],
+          evaluatedAt: new Date(),
+        };
+      });
+
+      setResults(batchResults);
       setSummary(response.data.summary);
+      addHistoryItems(historyItems);
     } catch (error: any) {
       console.error(error);
-
-      alert(
+      setErrorMessage(
         error?.response?.data?.detail ??
           "Failed to evaluate the uploaded CSV."
       );
@@ -144,15 +195,24 @@ function BatchEvaluation() {
       </div>
     </div>
 
+    {errorMessage && (
+      <div className="glass-card rounded-2xl p-4 bg-red-500/10 border border-red-500/20 text-red-100">
+        {errorMessage}
+      </div>
+    )}
+
     {/* Summary Cards */}
 
     {summary && (
 
       <div>
 
-        <h2 className="text-2xl font-semibold text-white mb-6">
-          Evaluation Summary
-        </h2>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <div>
+            <h2 className="text-2xl font-semibold text-white">Evaluation Summary</h2>
+            <p className="text-slate-400 text-sm">Review the batch results below after evaluation.</p>
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
 

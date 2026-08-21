@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { EvaluationResult, EvaluationInput, AppSettings, EvaluationMetrics } from '../types';
+import { EvaluationResult, EvaluationInput, AppSettings } from '../types';
 
 export type EvaluationStage = 'idle' | 'analyzing' | 'correctness' | 'hallucination' | 'computing' | 'generating' | 'complete';
 
@@ -12,6 +12,7 @@ export interface StageInfo {
 interface EvaluationContextType {
   currentEvaluation: EvaluationResult | null;
   history: EvaluationResult[];
+  evaluationError: string | null;
   settings: AppSettings;
   isEvaluating: boolean;
   currentStage: StageInfo;
@@ -19,6 +20,7 @@ interface EvaluationContextType {
   clearCurrentEvaluation: () => void;
   updateSettings: (settings: Partial<AppSettings>) => void;
   deleteFromHistory: (id: string) => void;
+  addHistoryItems: (items: EvaluationResult[]) => void;
 }
 
 const EvaluationContext = createContext<EvaluationContextType | undefined>(undefined);
@@ -34,6 +36,7 @@ const stages: StageInfo[] = [
 export function EvaluationProvider({ children }: { children: ReactNode }) {
   const [currentEvaluation, setCurrentEvaluation] = useState<EvaluationResult | null>(null);
   const [history, setHistory] = useState<EvaluationResult[]>([]);
+  const [evaluationError, setEvaluationError] = useState<string | null>(null);
   const [settings, setSettings] = useState<AppSettings>({
     darkMode: true,
     framework: 'RAGAS',
@@ -41,7 +44,15 @@ export function EvaluationProvider({ children }: { children: ReactNode }) {
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [currentStage, setCurrentStage] = useState<StageInfo>({ stage: 'idle', label: '', progress: 0 });
 
+   const extractScore = (value: unknown): number => {
+    if (typeof value === 'number' && Number.isFinite(value)) return value;
+    if (typeof value !== 'string') return 0;
+    const match = value.match(/-?\d+(?:\.\d+)?/);
+    return match ? Number(match[0]) : 0;
+   };
+
  const evaluate = useCallback(async (input: EvaluationInput) => {
+  setEvaluationError(null);
   setIsEvaluating(true);
   setCurrentStage(stages[0]);
 
@@ -68,37 +79,25 @@ export function EvaluationProvider({ children }: { children: ReactNode }) {
   }),
 });
 
+if (!response.ok) {
+  const errorResult = await response.json().catch(() => ({}));
+  throw new Error(errorResult.detail || `Evaluation failed (${response.status}).`);
+}
+
 const apiResult = await response.json();
-const formatOutput = (text: string) => text
+const formatOutput = (text: unknown) => String(text ?? '')
     .replace(/Reason:/g, "\nReason:\n")
     .replace(/\n{3,}/g, "\n\n");
 
 console.log("API Result:", apiResult);
 console.log("Verdict:", apiResult.verdict);
 
-    const relevance =
-      Number(apiResult.relevance.match(/\d+/)?.[0]) || 0;
+    const relevance = extractScore(apiResult.relevance);
+    const accuracy = extractScore(apiResult.accuracy);
+    const hallucination = extractScore(apiResult.hallucination);
+    const completeness = extractScore(apiResult.completeness);
 
-    const accuracy =
-      Number(apiResult.accuracy.match(/\d+/)?.[0]) || 0;
-
-    const hallucination =
-      Number(apiResult.hallucination.match(/\d+/)?.[0]) || 0;
-
-    const completeness =
-      Number(apiResult.completeness.match(/\d+/)?.[0]) || 0;
-
-    const overall =
-      Math.round(
-        (
-          (
-            relevance +
-            accuracy +
-            completeness +
-            (10 - hallucination)
-          ) / 4
-        ) * 10
-    );
+    const overall = extractScore(apiResult.verdict?.overall_score);
 
     const evaluationResult: EvaluationResult = {
       id: Date.now().toString(),
@@ -112,15 +111,19 @@ console.log("Verdict:", apiResult.verdict);
       sourceDocument: input.sourceDocument?.name,
 
       metrics: {
-        correctness: accuracy,
-        relevance: relevance,
+        correctness: accuracy * 10,
+        relevance: relevance * 10,
         faithfulness: 100,
-        completeness: completeness*10,
+        completeness: completeness * 10,
         fluency: 100,
-        hallucinationRisk: hallucination*10,
+        hallucinationRisk: hallucination * 10,
         overallScore: overall,
       },
-      verdict: apiResult.verdict,
+      verdict: {
+        overall_score: extractScore(apiResult.verdict?.overall_score),
+        verdict: apiResult.verdict?.verdict || 'NEEDS IMPROVEMENT',
+        summary: apiResult.verdict?.summary || apiResult.verdict?.reason || '',
+      },
       hallucinationLevel:
         hallucination <= 2
           ? "Low"
@@ -148,6 +151,7 @@ setHistory((prev) => [evaluationResult, ...prev]);
 
   } catch (err) {
     console.error(err);
+    setEvaluationError(err instanceof Error ? err.message : 'Unable to complete evaluation.');
   }
 
   setIsEvaluating(false);
@@ -168,6 +172,14 @@ setHistory((prev) => [evaluationResult, ...prev]);
     setSettings((prev) => ({ ...prev, ...newSettings }));
   }, []);
 
+  const addHistoryItems = useCallback((items: EvaluationResult[]) => {
+    setHistory((prev) => {
+      const existingIds = new Set(prev.map((item) => item.id));
+      const newItems = items.filter((item) => !existingIds.has(item.id));
+      return [...newItems, ...prev];
+    });
+  }, []);
+
   const deleteFromHistory = useCallback((id: string) => {
     setHistory((prev) => prev.filter((item) => item.id !== id));
   }, []);
@@ -177,6 +189,7 @@ setHistory((prev) => [evaluationResult, ...prev]);
       value={{
         currentEvaluation,
         history,
+        evaluationError,
         settings,
         isEvaluating,
         currentStage,
@@ -184,6 +197,7 @@ setHistory((prev) => [evaluationResult, ...prev]);
         clearCurrentEvaluation,
         updateSettings,
         deleteFromHistory,
+        addHistoryItems,
       }}
     >
       {children}
