@@ -8,9 +8,27 @@ from judge_orchestrator import evaluate_response
 from batch_evaluator import evaluate_csv
 from report_generator import create_pdf_report
 from io import BytesIO
-
+import os
 app = FastAPI()
 
+# --- PASTE THIS BLOCK HERE ---
+allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "")
+custom_origins = [o.strip() for o in allowed_origins_env.split(",") if o.strip()]
+
+origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:3000",
+] + custom_origins
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins if origins else ["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+# -----------------------------
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
