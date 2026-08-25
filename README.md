@@ -84,10 +84,14 @@ AI_RESPONSE_EVALUATOR
 - Authentication
 - Persistent Database
 
+## 🔗 Live Deployment & Links
+
+* **Live Web Application:** [AI Response Validator Frontend](https://ai-response-validator-frontend.onrender.com)
+* **Backend API Base URL:** `https://ai-response-validation-backend-s70w.onrender.com`
+* **Interactive API Documentation:** [Swagger UI Docs](https://ai-response-validation-backend-s70w.onrender.com/docs)
+
 ## Author
 
 **Bhavya Sri Pampana**
 
 B.Tech - Artificial Intelligence and Machine Learning
-
-Shri Vishnu Engineering College for Women
