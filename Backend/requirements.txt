@@ -1,5 +1,14 @@
 fastapi
 uvicorn
+python-dotenv
+pydantic
+chromadb
 pandas
 reportlab
-python-dotenv
+groq
+google-generativeai
+langchain
+langchain-core
+langchain-community
+langchain-groq
+langchain-google-genai
