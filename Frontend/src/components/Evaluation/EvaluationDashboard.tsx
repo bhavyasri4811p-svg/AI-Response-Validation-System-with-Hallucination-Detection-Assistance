@@ -1,5 +1,6 @@
 ﻿import React, { useEffect, useMemo, useState } from 'react';
 import { useEvaluation } from '../../store/EvaluationContext';
+import { API_BASE_URL } from '../../api';
 import {
   PieChart,
   Pie,
@@ -184,7 +185,7 @@ export function EvaluationDashboard({ singleOnly = false, showCurrentEvaluation 
 
     setExporting(true);
     try {
-      const response = await fetch('http://127.0.0.1:8000/export_report', {
+      const response = await fetch(`${API_BASE_URL}/export_report`, { 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

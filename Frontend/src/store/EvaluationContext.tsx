@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { EvaluationResult, EvaluationInput, AppSettings } from '../types';
+import { API_BASE_URL } from '../api';
 
 export type EvaluationStage = 'idle' | 'analyzing' | 'correctness' | 'hallucination' | 'computing' | 'generating' | 'complete';
 
@@ -67,7 +68,7 @@ export function EvaluationProvider({ children }: { children: ReactNode }) {
   await new Promise((resolve) => setTimeout(resolve, 400));
 
   try {
-   const response = await fetch("http://127.0.0.1:8000/evaluate", {
+   const response = await fetch(`${API_BASE_URL}/evaluate`, {
   method: "POST",
   headers: {
     "Content-Type": "application/json",

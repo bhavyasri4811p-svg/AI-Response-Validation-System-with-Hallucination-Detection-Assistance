@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import axios from "axios";
 import { useEvaluation } from '../../store/EvaluationContext';
-
+import { API_BASE_URL } from '../../api';
 interface Result {
   question: string;
   response?: string;
@@ -72,7 +72,7 @@ function BatchEvaluation() {
       setErrorMessage(null);
 
       const response = await axios.post(
-        "http://127.0.0.1:8000/batch_evaluate",
+        `${API_BASE_URL}/batch_evaluate`,
         formData
       );
 
